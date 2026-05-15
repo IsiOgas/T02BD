@@ -56,15 +56,16 @@ require 'conexion.php';
                     <th>Región Ejecución</th>
                     <th>Presupuesto</th>
                     <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 // Esta es la consulta base (igual a la de antes)
-                $sql = "SELECT p.Codigo_Postulacion, i.Nombre_Iniciativa, e.Nombre_Empresa, s.Nombre_Sede, 
+                $sql = "SELECT p.Numero_Postulacion, p.Codigo_Postulacion, i.Nombre_Iniciativa, e.Nombre_Empresa, s.Nombre_Sede, 
                                r.Nombre_Region AS Region_Ejecucion, p.Presupuesto_Total, est.Nombre_Estado
                         FROM Postulacion p
-                        JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion
+                        LEFT JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion
                         JOIN Entidad_Empresa e ON p.Rut_Empresa = e.Rut_Empresa
                         JOIN Sede s ON p.ID_Sede = s.ID_Sede
                         JOIN Region r ON p.ID_Region_Ejecucion = r.ID_Region
@@ -111,6 +112,7 @@ require 'conexion.php';
                         // Formateamos el número para que se vea como dinero (ej: $10.000.000)
                         echo "<td>$" . number_format($fila["Presupuesto_Total"], 0, ',', '.') . "</td>";
                         echo "<td><span class='badge bg-info'>" . $fila["Nombre_Estado"] . "</span></td>";
+                        echo "<td><a href='detalle_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-warning'>Ver Detalle</a></td>";
                         echo "</tr>";
                     }
                 } else {
