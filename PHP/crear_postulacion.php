@@ -20,6 +20,7 @@ $empresas = $conexion->query("SELECT Rut_Empresa, Nombre_Empresa FROM Entidad_Em
 $sedes = $conexion->query("SELECT ID_Sede, Nombre_Sede FROM Sede");
 $regiones = $conexion->query("SELECT ID_Region, Nombre_Region FROM Region");
 $tipos_iniciativa = $conexion->query("SELECT ID_tipo_iniciativa, Nombre_Tipo_Iniciativa FROM Tipo_Iniciativa");
+$integrantes_db = $conexion->query("SELECT ID_integrante, Nombre_Integrante, RUT_Integrante FROM Integrante_Equipo ORDER BY Nombre_Integrante ASC");
 ?>
 
 <!DOCTYPE html>
@@ -123,7 +124,63 @@ $tipos_iniciativa = $conexion->query("SELECT ID_tipo_iniciativa, Nombre_Tipo_Ini
                         <?php } ?>
                     </select>
                 </div>
-
+                <h5 class="text-secondary border-bottom pb-2 mt-4 mb-3">4. Antecedentes de la Iniciativa</h5>
+                <div class="mb-3">
+                    <label class="form-label">Nombre de la Iniciativa (*)</label>
+                    <input type="text" class="form-control" name="nombre_iniciativa" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Objetivo de la Iniciativa (*)</label>
+                    <textarea class="form-control" name="objetivo_iniciativa" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción de las Soluciones (*)</label>
+                    <textarea class="form-control" name="descripcion_soluciones" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Resultados Esperados (*)</label>
+                    <textarea class="form-control" name="resultados_esperados" rows="2" required></textarea>
+                </div>
+                <h5 class="text-secondary border-bottom pb-2 mt-4 mb-3">5. Equipo de Trabajo</h5>
+                <div class="mb-3">
+                    <label class="form-label">Seleccione a los integrantes (Mantenga presionado Ctrl / Cmd para seleccionar varios) (*)</label>
+                    <select class="form-select" name="equipo[]" multiple required size="5">
+                        <?php while($int = $integrantes_db->fetch_assoc()) { ?>
+                            <option value="<?php echo $int['ID_integrante']; ?>">
+                                <?php echo $int['Nombre_Integrante']; ?> (RUT: <?php echo $int['RUT_Integrante']; ?>)
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <h5 class="text-secondary border-bottom pb-2 mt-4 mb-3">6. Cronograma (Primeras 2 Etapas)</h5>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Etapa 1 (*)</label>
+                        <input type="text" class="form-control" name="etapa[]" placeholder="Ej: Planificación" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Entregable 1 (*)</label>
+                        <input type="text" class="form-control" name="entregable[]" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Plazo (Semanas) (*)</label>
+                        <input type="number" class="form-control" name="plazos[]" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Etapa 2</label>
+                        <input type="text" class="form-control" name="etapa[]" placeholder="Opcional">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Entregable 2</label>
+                        <input type="text" class="form-control" name="entregable[]">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Plazo (Semanas)</label>
+                        <input type="number" class="form-control" name="plazos[]">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-success btn-lg w-100 mt-4">Guardar y Continuar</button>
 
             </form>

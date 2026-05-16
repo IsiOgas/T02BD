@@ -62,40 +62,23 @@ require 'conexion.php';
             <tbody>
                 <?php
                 // Esta es la consulta base (igual a la de antes)
-                $sql = "SELECT p.Numero_Postulacion, p.Codigo_Postulacion, i.Nombre_Iniciativa, e.Nombre_Empresa, s.Nombre_Sede, 
-                               r.Nombre_Region AS Region_Ejecucion, p.Presupuesto_Total, est.Nombre_Estado
-                        FROM Postulacion p
-                        LEFT JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion
-                        JOIN Entidad_Empresa e ON p.Rut_Empresa = e.Rut_Empresa
-                        JOIN Sede s ON p.ID_Sede = s.ID_Sede
-                        JOIN Region r ON p.ID_Region_Ejecucion = r.ID_Region
-                        JOIN Estado_Postulacion est ON p.ID_Estado = est.ID_Estado";
+                // Usamos la VISTA que creamos en la base de datos (¡Requisito de la rúbrica cumplido!)
+                $sql = "SELECT * FROM Vista_Postulaciones_Principal";
 
                 // Preguntamos: ¿El usuario apretó el botón de buscar y escribió algo?
                 if (isset($_GET['buscar']) && $_GET['buscar'] != '') {
                     
-                    // Si es así, le agregamos la condición WHERE a nuestra consulta SQL
-                    // Usamos LIKE para buscar coincidencias parciales
-                    $sql .= " WHERE p.Codigo_Postulacion LIKE ? 
-                              OR i.Nombre_Iniciativa LIKE ? 
-                              OR e.Nombre_Empresa LIKE ?
-                              OR s.Nombre_Sede LIKE ?";
+                    $sql .= " WHERE Codigo_Postulacion LIKE ? 
+                              OR Nombre_Iniciativa LIKE ? 
+                              OR Nombre_Empresa LIKE ?
+                              OR Nombre_Sede LIKE ?";
 
-                    
-                    // Preparamos la consulta (¡Bonus de seguridad contra inyección SQL!)
                     $stmt = $conexion->prepare($sql);
-                    
-                    // Le agregamos los % al inicio y al final. 
-                    // Esto le dice a MySQL: "Encuentra este texto en cualquier parte de la oración"
                     $termino = "%" . $_GET['buscar'] . "%";
-                    
-                    // Pasamos el término 3 veces porque tenemos tres signos de interrogación '?' en el WHERE
                     $stmt->bind_param("ssss", $termino, $termino, $termino, $termino);
                 } else {
-                    // Si la barra está vacía, preparamos la consulta normal sin filtros
                     $stmt = $conexion->prepare($sql);
                 }
-
                 // Ejecutamos la magia
                 $stmt->execute();
                 $resultado = $stmt->get_result();
@@ -112,7 +95,11 @@ require 'conexion.php';
                         // Formateamos el número para que se vea como dinero (ej: $10.000.000)
                         echo "<td>$" . number_format($fila["Presupuesto_Total"], 0, ',', '.') . "</td>";
                         echo "<td><span class='badge bg-info'>" . $fila["Nombre_Estado"] . "</span></td>";
-                        echo "<td><a href='detalle_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-warning'>Ver Detalle</a></td>";
+                        echo "<td>";
+                        echo "<a href='detalle_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-info me-1 text-white'>Ver Detalle</a>";
+                        echo "<a href='editar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-warning me-1'>Editar</a>";
+                        echo "<a href='eliminar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"¿Estás seguro de que deseas eliminar esta postulación por completo?\")'>Eliminar</a>";
+                        echo "</td>";
                         echo "</tr>";
                     }
                 } else {

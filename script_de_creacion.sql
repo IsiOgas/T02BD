@@ -160,3 +160,60 @@ CREATE TABLE Usuarios (
     Contrasena VARCHAR(255) NOT NULL,
     Rol INT NOT NULL
 ) ENGINE=InnoDB;
+
+CREATE VIEW Vista_Postulaciones_Principal AS
+SELECT 
+    p.Numero_Postulacion, 
+    p.Codigo_Postulacion, 
+    i.Nombre_Iniciativa, 
+    e.Nombre_Empresa, 
+    s.Nombre_Sede, 
+    r.Nombre_Region AS Region_Ejecucion, 
+    p.Presupuesto_Total, 
+    est.Nombre_Estado
+FROM Postulacion p
+LEFT JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion
+JOIN Entidad_Empresa e ON p.Rut_Empresa = e.Rut_Empresa
+JOIN Sede s ON p.ID_Sede = s.ID_Sede
+JOIN Region r ON p.ID_Region_Ejecucion = r.ID_Region
+JOIN Estado_Postulacion est ON p.ID_Estado = est.ID_Estado;
+
+DELIMITER //
+
+CREATE FUNCTION TotalSemanasPostulacion(id_post INT) 
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+    SELECT SUM(Plazos) INTO total FROM Etapa_Cronograma WHERE ID_Postulacion = id_post;
+    IF total IS NULL THEN
+        SET total = 0;
+    END IF;
+    RETURN total;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER Validar_Presupuesto_Insert
+BEFORE INSERT ON Postulacion
+FOR EACH ROW
+BEGIN
+    IF NEW.Presupuesto_Total < 0 THEN
+        SET NEW.Presupuesto_Total = 0;
+    END IF;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE CambiarEstadoPostulacion(IN p_numero INT, IN p_nuevo_estado INT)
+BEGIN
+    UPDATE Postulacion 
+    SET ID_Estado = p_nuevo_estado 
+    WHERE Numero_Postulacion = p_numero;
+END //
+
+DELIMITER ;
