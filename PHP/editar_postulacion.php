@@ -14,7 +14,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 require 'conexion.php';
 $id_postulacion = intval($_GET['id']);
 
-// Obtenemos los datos actuales de la postulación e iniciativa
+//obtenemos los datos actuales de la postulación e iniciativa
 $sql = "SELECT p.*, i.Nombre_Iniciativa, i.Objetivo_Iniciativa, i.Descripcion_Soluciones, i.Resultados_Esperados 
         FROM Postulacion p 
         LEFT JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion 
@@ -29,7 +29,6 @@ if (!$postulacion) {
     exit();
 }
 
-// Catálogos para los dropdowns
 $sedes = $conexion->query("SELECT ID_Sede, Nombre_Sede FROM Sede");
 $regiones = $conexion->query("SELECT ID_Region, Nombre_Region FROM Region");
 $tipos_iniciativa = $conexion->query("SELECT ID_tipo_iniciativa, Nombre_Tipo_Iniciativa FROM Tipo_Iniciativa");
@@ -41,7 +40,7 @@ $regiones_array = $regiones->fetch_all(MYSQLI_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Editar Postulación #<?php echo $id_postulacion; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container mt-5 mb-5">

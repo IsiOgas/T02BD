@@ -179,7 +179,6 @@ JOIN Region r ON p.ID_Region_Ejecucion = r.ID_Region
 JOIN Estado_Postulacion est ON p.ID_Estado = est.ID_Estado;
 
 DELIMITER //
-
 CREATE FUNCTION TotalSemanasPostulacion(id_post INT) 
 RETURNS INT
 DETERMINISTIC
@@ -191,11 +190,9 @@ BEGIN
     END IF;
     RETURN total;
 END //
-
 DELIMITER ;
 
 DELIMITER //
-
 CREATE TRIGGER Validar_Presupuesto_Insert
 BEFORE INSERT ON Postulacion
 FOR EACH ROW
@@ -204,16 +201,18 @@ BEGIN
         SET NEW.Presupuesto_Total = 0;
     END IF;
 END //
-
 DELIMITER ;
 
 DELIMITER //
-
 CREATE PROCEDURE CambiarEstadoPostulacion(IN p_numero INT, IN p_nuevo_estado INT)
 BEGIN
     UPDATE Postulacion 
     SET ID_Estado = p_nuevo_estado 
     WHERE Numero_Postulacion = p_numero;
 END //
-
 DELIMITER ;
+
+
+ALTER TABLE Postulacion ADD Correo_Responsable VARCHAR(100) DEFAULT 'postulante@usm.cl';
+ALTER TABLE Postulacion ADD ID_Evaluador INT NULL;
+ALTER TABLE Postulacion ADD FOREIGN KEY (ID_Evaluador) REFERENCES Usuarios(ID_Usuario);

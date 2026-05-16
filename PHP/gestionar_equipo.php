@@ -8,7 +8,7 @@ if (!isset($_SESSION['usuario'])) {
 
 require 'conexion.php';
 
-// Consulta para traer a todos los integrantes con su tipo y sede
+//consulta para traer a todos los integrantes con su tipo y sede
 $sql = "SELECT ie.ID_integrante, ie.Nombre_Integrante, ie.RUT_Integrante, ie.Departamento_Integrante, 
                ie.Mail_Integrante, ie.Telefono_Integrante, tp.Nombre_Tipo_Persona, s.Nombre_Sede 
         FROM Integrante_Equipo ie
@@ -23,7 +23,7 @@ $resultado = $conexion->query($sql);
 <head>
     <meta charset="UTF-8">
     <title>Gestionar Equipo - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 

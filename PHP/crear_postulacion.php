@@ -1,13 +1,13 @@
 <?php
 session_start();
 
-// Validamos que el usuario haya iniciado sesión
+//validamos que el usuario haya iniciado sesión
 if (!isset($_SESSION['usuario'])) {
     header("Location: index.php");
     exit();
 }
 
-// Según el PDF, el Rol 1 (Postulante) es quien crea las postulaciones
+//según el PDF, el rol 1 es quien crea las postulaciones
 if ($_SESSION['rol'] != 1) {
     echo "<script>alert('Solo los Responsables Académicos (Rol 1) pueden crear postulaciones.'); window.location.href='principal.php';</script>";
     exit();
@@ -15,7 +15,7 @@ if ($_SESSION['rol'] != 1) {
 
 require 'conexion.php';
 
-// Traemos los catálogos de la base de datos para llenar los selectores (dropdowns)
+//traemos los catalogos de la base de datos para llenar los selectores
 $empresas = $conexion->query("SELECT Rut_Empresa, Nombre_Empresa FROM Entidad_Empresa");
 $sedes = $conexion->query("SELECT ID_Sede, Nombre_Sede FROM Sede");
 $regiones = $conexion->query("SELECT ID_Region, Nombre_Region FROM Region");
@@ -29,7 +29,7 @@ $integrantes_db = $conexion->query("SELECT ID_integrante, Nombre_Integrante, RUT
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Postulación - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
@@ -82,7 +82,7 @@ $integrantes_db = $conexion->query("SELECT ID_integrante, Nombre_Integrante, RUT
                         <select class="form-select" name="region_ejecucion" required>
                             <option value="">Seleccione...</option>
                             <?php 
-                            // Como usamos el mismo resultado de regiones dos veces, lo guardamos en un array temporal
+                            //como usamos el mismo resultado de regiones dos veces, lo guardamos en un array temporal
                             $regiones_array = [];
                             while($r = $regiones->fetch_assoc()) { 
                                 $regiones_array[] = $r;
@@ -187,6 +187,5 @@ $integrantes_db = $conexion->query("SELECT ID_integrante, Nombre_Integrante, RUT
         </div>
     </div>
 </div>
-
 </body>
 </html>

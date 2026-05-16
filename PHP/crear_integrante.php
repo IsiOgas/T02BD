@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1) {
+if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
     header("Location: index.php");
     exit();
 }
@@ -17,7 +17,7 @@ $tipos = $conexion->query("SELECT ID_Tipo_Persona, Nombre_Tipo_Persona FROM Tipo
 <head>
     <meta charset="UTF-8">
     <title>Crear Integrante - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 

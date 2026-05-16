@@ -14,7 +14,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 require 'conexion.php';
 $id_integrante = intval($_GET['id']);
 
-// Consultamos los datos actuales del integrante
+//consultamos los datos actuales del integrante
 $sql = "SELECT * FROM Integrante_Equipo WHERE ID_integrante = ?";
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("i", $id_integrante);
@@ -26,7 +26,7 @@ if (!$integrante) {
     exit();
 }
 
-// Catálogos para llenar los selects
+//catálogos para llenar los selects
 $sedes = $conexion->query("SELECT ID_Sede, Nombre_Sede FROM Sede");
 $tipos = $conexion->query("SELECT ID_Tipo_Persona, Nombre_Tipo_Persona FROM Tipo_Persona");
 ?>
@@ -36,7 +36,7 @@ $tipos = $conexion->query("SELECT ID_Tipo_Persona, Nombre_Tipo_Persona FROM Tipo
 <head>
     <meta charset="UTF-8">
     <title>Editar Integrante - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 

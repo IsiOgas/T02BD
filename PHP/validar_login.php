@@ -11,11 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pass = $_POST['contrasena'];
     $rol_ingresado = $_POST['rol'];
 
-    //consulta segura (Prepared Statement) para evitar inyección SQL (¡Bonus de 5 puntos!)
     $sql = "SELECT ID_Usuario, Rol FROM Usuarios WHERE Correo = ? AND Contrasena = ? AND Rol = ?";
     $stmt = $conexion->prepare($sql);
     
-    //las "ssi" significan: String (correo), String (pass), Integer (rol)
     $stmt->bind_param("ssi", $correo, $pass, $rol_ingresado);
     $stmt->execute();
     $resultado = $stmt->get_result();

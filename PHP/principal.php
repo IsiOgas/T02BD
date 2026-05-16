@@ -8,40 +8,48 @@ if (!isset($_SESSION['usuario'])) {
 
 require 'conexion.php';
 
-// Catálogos para el filtro avanzado
+//catalogos para el filtro avanzado
 $sedes = $conexion->query("SELECT Nombre_Sede FROM Sede");
 $estados = $conexion->query("SELECT Nombre_Estado FROM Estado_Postulacion");
 
-// --- LÓGICA DE BÚSQUEDA AVANZADA ---
-$sql = "SELECT * FROM Vista_Postulaciones_Principal WHERE 1=1";
+//logica de busqueda avanzada
+$sql = "SELECT v.* FROM Vista_Postulaciones_Principal v ";
+
 $filtros = [];
 $tipos_datos = "";
 
-// Filtro por texto libre
+//si el usuario presionó "Mis Postulaciones" y es Rol 1
+if (isset($_GET['mis_postulaciones']) && $_SESSION['rol'] == 1) {
+    $sql .= " JOIN Postulacion p ON v.Numero_Postulacion = p.Numero_Postulacion WHERE p.Correo_Responsable = ?";
+    $filtros[] = $_SESSION['usuario'];
+    $tipos_datos .= "s";
+} else {
+    $sql .= " WHERE 1=1";
+}
+
 if (!empty($_GET['buscar'])) {
-    $sql .= " AND (Codigo_Postulacion LIKE ? OR Nombre_Iniciativa LIKE ? OR Nombre_Empresa LIKE ?)";
+    $sql .= " AND (v.Codigo_Postulacion LIKE ? OR v.Nombre_Iniciativa LIKE ? OR v.Nombre_Empresa LIKE ?)";
     $termino = "%" . $_GET['buscar'] . "%";
     array_push($filtros, $termino, $termino, $termino);
     $tipos_datos .= "sss";
 }
 
-// Filtro por Sede
+//filtro por Sede
 if (!empty($_GET['sede'])) {
-    $sql .= " AND Nombre_Sede = ?";
+    $sql .= " AND v.Nombre_Sede = ?";
     $filtros[] = $_GET['sede'];
     $tipos_datos .= "s";
 }
 
-// Filtro por Estado
+//filtro por Estado
 if (!empty($_GET['estado'])) {
-    $sql .= " AND Nombre_Estado = ?";
+    $sql .= " AND v.Nombre_Estado = ?";
     $filtros[] = $_GET['estado'];
     $tipos_datos .= "s";
 }
 
 $stmt = $conexion->prepare($sql);
 
-// Si hay filtros activos, los vinculamos (bind_param) dinámicamente
 if (!empty($filtros)) {
     $stmt->bind_param($tipos_datos, ...$filtros);
 }
@@ -55,18 +63,24 @@ $resultado = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <title>Principal - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="principal.php">CT-USM</a>
     <div class="d-flex align-items-center">
-        <span class="navbar-text me-3 text-white">
+        <span class="navbar-text me-3 text-white fw-bold">
             Usuario: <?php echo $_SESSION['usuario']; ?> (Rol: <?php echo $_SESSION['rol']; ?>)
         </span>
-        <a href="gestionar_equipo.php" class="btn btn-info btn-sm me-2 text-white fw-bold">Directorio Equipo</a>
+        <?php if ($_SESSION['rol'] == 1): ?>
+            <a href="gestionar_equipo.php" class="btn btn-info btn-sm me-2 text-white fw-bold">Directorio Equipo</a>
+        <?php endif; ?>
+
+        <?php if ($_SESSION['rol'] == 3): ?>
+            <a href="admin_gestion.php" class="btn btn-danger btn-sm me-2 text-white fw-bold">Gestión Admin</a>
+        <?php endif; ?>
         <a href="logout.php" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
     </div>
   </div>
@@ -76,9 +90,13 @@ $resultado = $stmt->get_result();
     
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Panel de Postulaciones</h2>
-        <?php if ($_SESSION['rol'] == 1): ?>
-            <a href="crear_postulacion.php" class="btn btn-success btn-lg shadow-sm">➕ Crear Nueva Postulación</a>
-        <?php endif; ?>
+        <div>
+            <?php if ($_SESSION['rol'] == 1): ?>
+                <a href="principal.php?mis_postulaciones=1" class="btn btn-warning btn-lg shadow-sm me-2">Mis Postulaciones</a>
+                <a href="principal.php" class="btn btn-secondary btn-lg shadow-sm me-2">Ver Todas</a>
+                <a href="crear_postulacion.php" class="btn btn-success btn-lg shadow-sm">Crear Nueva Postulación</a>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -107,7 +125,7 @@ $resultado = $stmt->get_result();
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">🔍 Filtrar</button>
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
                 </div>
             </form>
         </div>
@@ -138,18 +156,21 @@ $resultado = $stmt->get_result();
                         echo "<td>" . htmlspecialchars($fila["Nombre_Sede"]) . "</td>";
                         echo "<td>" . htmlspecialchars($fila["Region_Ejecucion"]) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . number_format($fila["Presupuesto_Total"], 0, ',', '.') . "</td>";
-                        echo "<td><span class='badge bg-info text-dark border border-info'>" . htmlspecialchars($fila["Nombre_Estado"]) . "</span></td>";
-                        
+                        $estado = htmlspecialchars($fila["Nombre_Estado"]);
+                        $color_badge = 'bg-secondary';
+                        if ($estado == 'En Revisión') $color_badge = 'bg-info text-dark';
+                        if ($estado == 'Aprobada') $color_badge = 'bg-success';
+                        if ($estado == 'Rechazada') $color_badge = 'bg-danger';
+                        if ($estado == 'Cerrada') $color_badge = 'bg-dark';
+
+                        echo "<td><span class='badge $color_badge'>" . $estado . "</span></td>";
                         echo "<td>";
                         echo "<a href='detalle_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-info text-white me-1'>Ver</a>";
                         
-                        // LÓGICA DE VISTAS POR ROLES
-                        if ($_SESSION['rol'] == 1) {
-                            // Opciones del Postulante
+                        if($_SESSION['rol'] == 1){
                             echo "<a href='editar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-warning me-1'>Editar</a>";
                             echo "<a href='eliminar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"¿Eliminar postulación completa?\")'>Borrar</a>";
-                        } else if ($_SESSION['rol'] == 2 || $_SESSION['rol'] == 3) {
-                            // Opciones del Evaluador / Admin
+                        } else if ($_SESSION['rol'] == 2){
                             echo "<a href='evaluar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-dark'>Evaluar</a>";
                         }
                         

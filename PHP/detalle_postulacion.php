@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-// Validamos que el usuario haya iniciado sesión
+//validamos que el usuario haya iniciado sesión
 if (!isset($_SESSION['usuario'])) {
     header("Location: index.php");
     exit();
 }
 
-// Validamos que venga el ID de la postulación por la URL
-if (!isset($_GET['id']) || empty($_GET['id'])) {
+//validamos que venga el ID de la postulación por la URL
+if(!isset($_GET['id']) || empty($_GET['id'])){
     echo "<script>alert('ID de postulación no válido.'); window.location.href='principal.php';</script>";
     exit();
 }
@@ -16,7 +16,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 require 'conexion.php';
 $id_postulacion = intval($_GET['id']);
 
-// --- 1. CONSULTA PRINCIPAL: Postulación + Empresa + Iniciativa ---
+//consulta principal: Postulación + Empresa + Iniciativa 
 $sql_principal = "SELECT p.*, e.Nombre_Empresa, e.Representante_Empresa, e.Mail_Representante, e.Convenio_USM, e.Telefono_Representante,
                          s.Nombre_Sede, r1.Nombre_Region AS Region_Ejecucion, r2.Nombre_Region AS Region_Impacto,
                          ti.Nombre_Tipo_Iniciativa, est.Nombre_Estado,
@@ -43,7 +43,7 @@ if ($resultado_p->num_rows == 0) {
 
 $postulacion = $resultado_p->fetch_assoc();
 
-// --- 2. CONSULTA DEL EQUIPO DE TRABAJO ---
+//consulta del equipo de trabajo
 $sql_equipo = "SELECT ie.Nombre_Integrante, ie.RUT_Integrante, ie.Mail_Integrante, pi.Rol_Cumple_Integrante, tp.Nombre_Tipo_Persona
                FROM Postulacion_Integrante pi
                JOIN Integrante_Equipo ie ON pi.ID_integrante = ie.ID_integrante
@@ -54,12 +54,20 @@ $stmt_eq->bind_param("i", $id_postulacion);
 $stmt_eq->execute();
 $equipo = $stmt_eq->get_result();
 
-// --- 3. CONSULTA DEL CRONOGRAMA ---
+//consulta del cronograma
 $sql_cronograma = "SELECT Etapa, Entregable, Plazos FROM Etapa_Cronograma WHERE ID_Postulacion = ?";
 $stmt_cr = $conexion->prepare($sql_cronograma);
 $stmt_cr->bind_param("i", $id_postulacion);
 $stmt_cr->execute();
 $cronograma = $stmt_cr->get_result();
+
+//usamos la funcion creada sql 
+$sql_funcion = "SELECT TotalSemanasPostulacion(?) AS Total";
+$stmt_func = $conexion->prepare($sql_funcion);
+$stmt_func->bind_param("i", $id_postulacion);
+$stmt_func->execute();
+$resultado_func = $stmt_func->get_result()->fetch_assoc();
+$total_semanas_bd = $resultado_func['Total'];
 ?>
 
 <!DOCTYPE html>
@@ -68,7 +76,7 @@ $cronograma = $stmt_cr->get_result();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle Postulación N° <?php echo $postulacion['Numero_Postulacion']; ?> - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
@@ -101,7 +109,7 @@ $cronograma = $stmt_cr->get_result();
                     <p><strong>Descripción de Soluciones:</strong><br><?php echo nl2br(htmlspecialchars($postulacion['Descripcion_Soluciones'] ?? 'No especificado')); ?></p>
                     <p><strong>Resultados Esperados:</strong><br><?php echo nl2br(htmlspecialchars($postulacion['Resultados_Esperados'] ?? 'No especificado')); ?></p>
                     <?php if (!empty($postulacion['Documentos'])): ?>
-                        <p><strong>Documento Adjunto:</strong> <span class="text-success">📄 <?php echo htmlspecialchars($postulacion['Documentos']); ?></span></p>
+                        <p><strong>Documento Adjunto:</strong> <span class="text-success" <?php echo htmlspecialchars($postulacion['Documentos']); ?></span></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -157,22 +165,18 @@ $cronograma = $stmt_cr->get_result();
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php 
-                                $total_semanas = 0;
-                                if ($cronograma->num_rows > 0): 
-                                ?>
-                                    <?php while ($cr = $cronograma->fetch_assoc()): 
-                                        $total_semanas += $cr['Plazos'];
-                                    ?>
+                                <?php if ($cronograma->num_rows > 0): ?>
+                                    <?php while ($cr = $cronograma->fetch_assoc()): ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars($cr['Etapa']); ?></td>
                                             <td><?php echo htmlspecialchars($cr['Entregable']); ?></td>
                                             <td class="text-center"><?php echo $cr['Plazos']; ?> semanas</td>
                                         </tr>
                                     <?php endwhile; ?>
+                                    
                                     <tr class="table-warning fw-bold">
                                         <td colspan="2" class="text-end">Duración Total del Proyecto:</td>
-                                        <td class="text-center text-danger"><?php echo $total_semanas; ?> semanas</td>
+                                        <td class="text-center text-danger"><?php echo $total_semanas_bd; ?> semanas</td>
                                     </tr>
                                 <?php else: ?>
                                     <tr><td colspan="3" class="text-center text-muted p-3">No hay etapas registradas en el cronograma.</td></tr>
@@ -221,6 +225,5 @@ $cronograma = $stmt_cr->get_result();
         </div>
     </div>
 </div>
-
 </body>
 </html>

@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1) {
+if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
     header("Location: index.php");
     exit();
 }
 
 require 'conexion.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if($_SERVER["REQUEST_METHOD"] == "POST"){
     $id = intval($_POST['id']);
     $nombre = $_POST['nombre'];
     $rut = $_POST['rut'];
@@ -25,18 +25,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("sssssiii", $nombre, $rut, $departamento, $correo, $telefono, $tipo_persona, $sede, $id);
 
-    if ($stmt->execute()) {
+    if($stmt->execute()){
         echo "<script>
                 alert('Datos del integrante actualizados con éxito.'); 
                 window.location.href='gestionar_equipo.php';
               </script>";
-    } else {
+    } else{
         echo "<script>
                 alert('Error al actualizar los datos: " . $stmt->error . "'); 
                 window.history.back();
               </script>";
     }
-} else {
+} else{
     header("Location: gestionar_equipo.php");
 }
 ?>

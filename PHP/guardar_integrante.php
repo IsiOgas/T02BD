@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1) {
+if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
     header("Location: index.php");
     exit();
 }
 
 require 'conexion.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if($_SERVER["REQUEST_METHOD"] == "POST"){
     $nombre = $_POST['nombre'];
     $rut = $_POST['rut'];
     $correo = $_POST['correo'];
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $stmt = $conexion->prepare($sql);
     
-    // Vinculamos los parámetros: sssssii (5 strings, 2 integers)
+    //vinculamos los parametros: sssssii (5 strings, 2 integers)
     $stmt->bind_param("sssssii", $nombre, $rut, $departamento, $correo, $telefono, $tipo_persona, $sede);
 
     if ($stmt->execute()) {
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 window.location.href='gestionar_equipo.php';
               </script>";
     } else {
-        // En caso de que el RUT ya exista, MySQL lanzará un error que podemos capturar
+        //en caso de que el RUT ya exista lanza advertencia
         echo "<script>
                 alert('Error al guardar: Posiblemente el RUT ya se encuentra registrado. Detalles: " . $stmt->error . "'); 
                 window.history.back();

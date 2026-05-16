@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Solo el Rol 2 (Evaluador) o 3 (Admin) pueden evaluar
+//solo el Rol 2 evaluador
 if (!isset($_SESSION['usuario']) || $_SESSION['rol'] == 1) {
     echo "<script>alert('No tienes permisos para evaluar.'); window.location.href='principal.php';</script>";
     exit();
@@ -9,23 +9,23 @@ if (!isset($_SESSION['usuario']) || $_SESSION['rol'] == 1) {
 
 require 'conexion.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if($_SERVER["REQUEST_METHOD"] == "POST"){
     $id_postulacion = intval($_POST['id_postulacion']);
     $nuevo_estado = intval($_POST['estado']);
 
-    // ¡REQUISITO DE RÚBRICA!: Usamos el Procedimiento Almacenado
+    //usamos el Procedimiento Almacenado
     $stmt = $conexion->prepare("CALL CambiarEstadoPostulacion(?, ?)");
     $stmt->bind_param("ii", $id_postulacion, $nuevo_estado);
 
-    if ($stmt->execute()) {
+    if($stmt->execute()){
         echo "<script>alert('Estado actualizado exitosamente.'); window.location.href='principal.php';</script>";
-    } else {
+    } else{
         echo "<script>alert('Error al actualizar: " . $conexion->error . "'); window.history.back();</script>";
     }
     exit();
 }
 
-if (!isset($_GET['id'])) {
+if(!isset($_GET['id'])){
     header("Location: principal.php");
     exit();
 }
@@ -38,7 +38,7 @@ $estados = $conexion->query("SELECT * FROM Estado_Postulacion");
 <head>
     <meta charset="UTF-8">
     <title>Evaluar Postulación - CT-USM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container mt-5">
