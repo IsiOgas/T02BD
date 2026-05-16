@@ -175,4 +175,6 @@ VALUES
 INSERT INTO Usuarios (Correo, Contrasena, Rol) VALUES
 ('postulante@usm.cl', '1234', 1),
 ('evaluador@usm.cl', '1234', 2),
-('admin@usm.cl', '1234', 3);
+('admin@usm.cl', '1234', 3)
+('postulante2@usm.cl', '1234', 1),
+('evaluador2@usm.cl', '1234', 2);

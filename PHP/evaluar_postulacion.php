@@ -30,7 +30,17 @@ if(!isset($_GET['id'])){
     exit();
 }
 $id = intval($_GET['id']);
-$estados = $conexion->query("SELECT * FROM Estado_Postulacion");
+$sql_seguridad = "SELECT u.Correo FROM Postulacion p LEFT JOIN Usuarios u ON p.ID_Evaluador = u.ID_Usuario WHERE p.Numero_Postulacion = ?";
+$stmt_seg = $conexion->prepare($sql_seguridad);
+$stmt_seg->bind_param("i", $id);
+$stmt_seg->execute();
+$resultado_seg = $stmt_seg->get_result()->fetch_assoc();
+
+if (!$resultado_seg || $resultado_seg['Correo'] != $_SESSION['usuario']) {
+    echo "<script>alert('Acceso denegado: Esta postulación no te ha sido asignada por el Administrador.'); window.location.href='principal.php';</script>";
+    exit();
+}
+$estados = $conexion->query("SELECT * FROM Estado_Postulacion WHERE Nombre_Estado != 'Borrador'");
 ?>
 
 <!DOCTYPE html>

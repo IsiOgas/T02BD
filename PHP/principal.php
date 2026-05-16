@@ -25,6 +25,9 @@ if (isset($_GET['mis_postulaciones']) && $_SESSION['rol'] == 1) {
     $tipos_datos .= "s";
 } else {
     $sql .= " WHERE 1=1";
+    if ($_SESSION['rol'] == 2 || $_SESSION['rol'] == 3) {
+        $sql .= " AND v.Nombre_Estado != 'Borrador'";
+    }
 }
 
 if (!empty($_GET['buscar'])) {
@@ -168,10 +171,18 @@ $resultado = $stmt->get_result();
                         echo "<a href='detalle_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-info text-white me-1'>Ver</a>";
                         
                         if($_SESSION['rol'] == 1){
+                            if ($estado == 'Borrador') {
+                                echo "<a href='enviar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-success me-1 text-white' onclick='return confirm(\"¿Deseas enviar esta postulación a revisión definitiva?\")'>Enviar</a>";
+                            }
                             echo "<a href='editar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-warning me-1'>Editar</a>";
                             echo "<a href='eliminar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"¿Eliminar postulación completa?\")'>Borrar</a>";
                         } else if ($_SESSION['rol'] == 2){
-                            echo "<a href='evaluar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-dark'>Evaluar</a>";
+                            // Si el correo del evaluador asignado coincide con el usuario logueado
+                            if ($_SESSION['usuario'] == $fila['Correo_Evaluador']) {
+                                echo "<a href='evaluar_postulacion.php?id=" . $fila["Numero_Postulacion"] . "' class='btn btn-sm btn-dark'>Evaluar</a>";
+                            } else {
+                                echo "<span class='badge bg-light text-muted border'>No asignada a ti</span>";
+                            }
                         }
                         
                         echo "</td>";

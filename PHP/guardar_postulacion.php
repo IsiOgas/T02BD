@@ -24,7 +24,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $region_impacto = $_POST['region_impacto'];
     $empresa = $_POST['empresa'];
     $tipo_iniciativa = $_POST['tipo_iniciativa'];
-    $estado_borrador = 1; 
+    $estado_borrador = 5; 
 
     //recibimos datos de Iniciativa
     $nombre_ini = $_POST['nombre_iniciativa'];

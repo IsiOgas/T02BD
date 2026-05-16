@@ -15,9 +15,10 @@ require 'conexion.php';
 $id_postulacion = intval($_GET['id']);
 
 //obtenemos los datos actuales de la postulación e iniciativa
-$sql = "SELECT p.*, i.Nombre_Iniciativa, i.Objetivo_Iniciativa, i.Descripcion_Soluciones, i.Resultados_Esperados 
+$sql = "SELECT p.*, i.Nombre_Iniciativa, i.Objetivo_Iniciativa, i.Descripcion_Soluciones, i.Resultados_Esperados, est.Nombre_Estado 
         FROM Postulacion p 
         LEFT JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion 
+        JOIN Estado_Postulacion est ON p.ID_Estado = est.ID_Estado
         WHERE p.Numero_Postulacion = ?";
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("i", $id_postulacion);
@@ -28,6 +29,13 @@ if (!$postulacion) {
     echo "<script>alert('Postulación no encontrada.'); window.location.href='principal.php';</script>";
     exit();
 }
+
+if ($postulacion['Correo_Responsable'] != $_SESSION['usuario']) {
+    echo "<script>alert('Acceso denegado: No eres el responsable de este proyecto.'); window.location.href='principal.php';</script>";
+    exit();
+}
+
+$ya_enviado = ($postulacion['Nombre_Estado'] != 'Borrador');
 
 $sedes = $conexion->query("SELECT ID_Sede, Nombre_Sede FROM Sede");
 $regiones = $conexion->query("SELECT ID_Region, Nombre_Region FROM Region");
@@ -52,15 +60,21 @@ $regiones_array = $regiones->fetch_all(MYSQLI_ASSOC);
             <form action="actualizar_postulacion.php" method="POST">
                 <input type="hidden" name="id" value="<?php echo $id_postulacion; ?>">
 
+                <?php if($ya_enviado): ?>
+                    <div class="alert alert-info">
+                        <strong>Aviso:</strong> Esta postulación ya se encuentra en estado <b><?php echo $postulacion['Nombre_Estado']; ?></b>. Por regla del CT-USM, los campos críticos (Código y Presupuesto) han sido bloqueados.
+                    </div>
+                <?php endif; ?>
+
                 <h5 class="text-secondary border-bottom pb-2 mb-3">1. Antecedentes Generales</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Código de Postulación</label>
-                        <input type="text" class="form-control" name="codigo" value="<?php echo $postulacion['Codigo_Postulacion']; ?>" required>
+                        <input type="text" class="form-control <?php echo $ya_enviado ? 'bg-light' : ''; ?>" name="codigo" value="<?php echo $postulacion['Codigo_Postulacion']; ?>" <?php echo $ya_enviado ? 'readonly' : ''; ?> required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Presupuesto Solicitado ($)</label>
-                        <input type="number" class="form-control" name="presupuesto" value="<?php echo intval($postulacion['Presupuesto_Total']); ?>" required>
+                        <input type="number" class="form-control <?php echo $ya_enviado ? 'bg-light' : ''; ?>" name="presupuesto" value="<?php echo intval($postulacion['Presupuesto_Total']); ?>" <?php echo $ya_enviado ? 'readonly' : ''; ?> required>
                     </div>
                 </div>
 

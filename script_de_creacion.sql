@@ -161,7 +161,7 @@ CREATE TABLE Usuarios (
     Rol INT NOT NULL
 ) ENGINE=InnoDB;
 
-CREATE VIEW Vista_Postulaciones_Principal AS
+CREATE OR REPLACE VIEW Vista_Postulaciones_Principal AS
 SELECT 
     p.Numero_Postulacion, 
     p.Codigo_Postulacion, 
@@ -170,13 +170,16 @@ SELECT
     s.Nombre_Sede, 
     r.Nombre_Region AS Region_Ejecucion, 
     p.Presupuesto_Total, 
-    est.Nombre_Estado
+    est.Nombre_Estado,
+    p.Correo_Responsable,
+    u.Correo AS Correo_Evaluador
 FROM Postulacion p
 LEFT JOIN Iniciativa i ON p.Numero_Postulacion = i.ID_Postulacion
 JOIN Entidad_Empresa e ON p.Rut_Empresa = e.Rut_Empresa
 JOIN Sede s ON p.ID_Sede = s.ID_Sede
 JOIN Region r ON p.ID_Region_Ejecucion = r.ID_Region
-JOIN Estado_Postulacion est ON p.ID_Estado = est.ID_Estado;
+JOIN Estado_Postulacion est ON p.ID_Estado = est.ID_Estado
+LEFT JOIN Usuarios u ON p.ID_Evaluador = u.ID_Usuario;
 
 DELIMITER //
 CREATE FUNCTION TotalSemanasPostulacion(id_post INT) 
@@ -216,3 +219,4 @@ DELIMITER ;
 ALTER TABLE Postulacion ADD Correo_Responsable VARCHAR(100) DEFAULT 'postulante@usm.cl';
 ALTER TABLE Postulacion ADD ID_Evaluador INT NULL;
 ALTER TABLE Postulacion ADD FOREIGN KEY (ID_Evaluador) REFERENCES Usuarios(ID_Usuario);
+INSERT INTO Estado_Postulacion (ID_Estado, Nombre_Estado) VALUES (5, 'Borrador');
