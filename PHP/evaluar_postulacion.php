@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-//solo el Rol 2 evaluador
 if (!isset($_SESSION['usuario']) || $_SESSION['rol'] == 1) {
     echo "<script>alert('No tienes permisos para evaluar.'); window.location.href='principal.php';</script>";
     exit();

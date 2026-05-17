@@ -1,10 +1,9 @@
 <?php
+session_start();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
-session_start();
 
 if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
     header("Location: index.php");
@@ -14,99 +13,90 @@ if(!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1){
 require 'conexion.php';
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
-    
-    //recibimos datos de Postulación
-    $codigo = $_POST['codigo'];
-    $fecha = $_POST['fecha'];
-    $presupuesto = $_POST['presupuesto'];
-    $sede = $_POST['sede'];
-    $region_ejecucion = $_POST['region_ejecucion'];
-    $region_impacto = $_POST['region_impacto'];
-    $empresa = $_POST['empresa'];
-    $tipo_iniciativa = $_POST['tipo_iniciativa'];
-    $estado_borrador = 5; 
-
-    //recibimos datos de Iniciativa
-    $nombre_ini = $_POST['nombre_iniciativa'];
-    $objetivo_ini = $_POST['objetivo_iniciativa'];
-    $desc_ini = $_POST['descripcion_soluciones'];
-    $resultados_ini = $_POST['resultados_esperados'];
-
-    //calculamos el ID
-    $resultado_id = $conexion->query("SELECT MAX(Numero_Postulacion) AS max_id FROM Postulacion");
-    $fila_id = $resultado_id->fetch_assoc();
-    $nuevo_numero = ($fila_id['max_id'] !== null) ? $fila_id['max_id'] + 1 : 1;
-
-    //iniciamos la transaccion (si algo falla, no se guarda nada)
-    $conexion->begin_transaction();
-
     try {
-        //insertamos postulacion
-        $creador = $_SESSION['usuario']; //obtenemos el correo de quien inició sesión
+        $conexion->begin_transaction();
 
-        $sql_post = "INSERT INTO Postulacion (Numero_Postulacion, Fecha_Postulacion, Codigo_Postulacion, Presupuesto_Total, Rut_Empresa, ID_Sede, ID_Region_Ejecucion, ID_Region_Impacto, ID_Tipo_Iniciativa, ID_Estado, Correo_Responsable) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $resultado = $conexion->query("SELECT MAX(Numero_Postulacion) AS max_id FROM Postulacion");
+        $fila = $resultado->fetch_assoc();
+        $nuevo_numero = ($fila['max_id']) ? $fila['max_id'] + 1 : 1;
+
+        $codigo = $_POST['codigo'];
+        $fecha = $_POST['fecha'];
+        $presupuesto = $_POST['presupuesto'];
+
+        $resp1 = $_POST['responsable1'];
+        $resp2 = $_POST['responsable2'];
         
+        $empresa = $_POST['empresa'];
+        $sede = $_POST['sede'];
+        $region_ejecucion = $_POST['region_ejecucion'];
+        $region_impacto = $_POST['region_impacto'];
+        $tipo_iniciativa = $_POST['tipo_iniciativa'];
+        
+        $estado_borrador = 5; 
+        $creador = $_SESSION['usuario'];
+
+        $sql_post = "INSERT INTO Postulacion (Numero_Postulacion, Fecha_Postulacion, Codigo_Postulacion, Presupuesto_Total, Nombre_Responsable_1, Nombre_Responsable_2, Rut_Empresa, ID_Sede, ID_Region_Ejecucion, ID_Region_Impacto, ID_Tipo_Iniciativa, ID_Estado, Correo_Responsable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt_post = $conexion->prepare($sql_post);
-        if (!$stmt_post) throw new Exception("Error al preparar Postulación: " . $conexion->error);
-        
-        $stmt_post->bind_param("issdsiiiiis", $nuevo_numero, $fecha, $codigo, $presupuesto, $empresa, $sede, $region_ejecucion, $region_impacto, $tipo_iniciativa, $estado_borrador, $creador);
+        if (!$stmt_post) throw new Exception("Error preparar Postulación: " . $conexion->error);
+
+        $stmt_post->bind_param("issdsssiiiiis", $nuevo_numero, $fecha, $codigo, $presupuesto, $resp1, $resp2, $empresa, $sede, $region_ejecucion, $region_impacto, $tipo_iniciativa, $estado_borrador, $creador);
         if (!$stmt_post->execute()) throw new Exception("Error al insertar Postulación: " . $stmt_post->error);
 
-        //insertar la iniciativa
-        $sql_ini = "INSERT INTO Iniciativa (Nombre_Iniciativa, Objetivo_Iniciativa, Descripcion_Soluciones, Resultados_Esperados, ID_Postulacion) 
-                    VALUES (?, ?, ?, ?, ?)";
-        
-        $stmt_ini = $conexion->prepare($sql_ini);
-        if (!$stmt_ini) throw new Exception("Error al preparar Iniciativa: " . $conexion->error);
+        $nombre_iniciativa = $_POST['nombre_iniciativa'];
+        $objetivo = $_POST['objetivo_iniciativa'];
+        $soluciones = $_POST['descripcion_soluciones'];
+        $resultados = $_POST['resultados_esperados'];
 
-        $stmt_ini->bind_param("ssssi", $nombre_ini, $objetivo_ini, $desc_ini, $resultados_ini, $nuevo_numero);
+        $sql_ini = "INSERT INTO Iniciativa (Nombre_Iniciativa, Objetivo_Iniciativa, Descripcion_Soluciones, Resultados_Esperados, ID_Postulacion) VALUES (?, ?, ?, ?, ?)";
+        $stmt_ini = $conexion->prepare($sql_ini);
+        $stmt_ini->bind_param("ssssi", $nombre_iniciativa, $objetivo, $soluciones, $resultados, $nuevo_numero);
         if (!$stmt_ini->execute()) throw new Exception("Error al insertar Iniciativa: " . $stmt_ini->error);
 
-        //insertar equipo de trabajo
-        $equipo = $_POST['equipo']; //arreglo con los id
-        $sql_equipo = "INSERT INTO Postulacion_Integrante (Numero_Postulacion, ID_integrante) VALUES (?, ?)";
+        $sql_equipo = "INSERT INTO Postulacion_Integrante (Numero_Postulacion, ID_integrante, Rol_Cumple_Integrante) VALUES (?, ?, ?)";
         $stmt_equipo = $conexion->prepare($sql_equipo);
-        if (!$stmt_equipo) throw new Exception("Error al preparar Equipo: " . $conexion->error);
-
-        foreach($equipo as $id_integrante){
-            $stmt_equipo->bind_param("ii", $nuevo_numero, $id_integrante);
-            if (!$stmt_equipo->execute()) throw new Exception("Error al vincular Integrante: " . $stmt_equipo->error);
+        if (isset($_POST['equipo']) && is_array($_POST['equipo'])) {
+            $rol_resto = 'Integrante';
+            foreach($_POST['equipo'] as $id_integrante){
+                $stmt_equipo->bind_param("iis", $nuevo_numero, $id_integrante, $rol_resto);
+                if (!$stmt_equipo->execute()) throw new Exception("Error al vincular Integrante: " . $stmt_equipo->error);
+            }
         }
 
-        //insertar cronograma
-        $etapas = $_POST['etapa'];
-        $entregables = $_POST['entregable'];
-        $plazos = $_POST['plazos'];
-
-        $sql_etapa = "INSERT INTO Etapa_Cronograma (ID_Postulacion, Etapa, Entregable, Plazos) VALUES (?, ?, ?, ?)";
-        $stmt_etapa = $conexion->prepare($sql_etapa);
-        if (!$stmt_etapa) throw new Exception("Error al preparar Cronograma: " . $conexion->error);
-
-        //recorremos los arreglos para insertar cada etapa que no este vacia
-        for ($i = 0; $i < count($etapas); $i++) {
-            if (!empty($etapas[$i]) && !empty($entregables[$i]) && !empty($plazos[$i])) {
-                $stmt_etapa->bind_param("issi", $nuevo_numero, $etapas[$i], $entregables[$i], $plazos[$i]);
-                if (!$stmt_etapa->execute()) throw new Exception("Error al insertar Etapa: " . $stmt_etapa->error);
+        $sql_crono = "INSERT INTO Etapa_Cronograma (ID_Postulacion, Etapa, Entregable, Plazos) VALUES (?, ?, ?, ?)";
+        $stmt_crono = $conexion->prepare($sql_crono);
+        if (isset($_POST['etapa']) && is_array($_POST['etapa'])) {
+            for ($i = 0; $i < count($_POST['etapa']); $i++) {
+                $etapa = $_POST['etapa'][$i];
+                $entregable = $_POST['entregable'][$i];
+                $plazos = $_POST['plazos'][$i];
+                
+                if (!empty($etapa) && !empty($entregable) && !empty($plazos)) {
+                    $stmt_crono->bind_param("issi", $nuevo_numero, $etapa, $entregable, $plazos);
+                    if (!$stmt_crono->execute()) throw new Exception("Error al insertar Cronograma: " . $stmt_crono->error);
+                }
             }
         }
 
         $conexion->commit();
+        echo "<script>alert('Borrador de postulación guardado con éxito.'); window.location.href='principal.php';</script>";
 
-        echo "<script>
-                alert('¡Éxito! La postulación y su iniciativa han sido creadas. Número: $nuevo_numero'); 
-                window.location.href='principal.php';
-              </script>";
-
-    } catch (Exception $e){
-        //si algo falla desasemos todo los cambios, para eso rollback
+    } catch (Exception $e) {
         $conexion->rollback();
-        echo "<script>
-                alert('Ocurrió un error: " . $e->getMessage() . "'); 
-                window.history.back();
-              </script>";
+        
+        $error_seguro = addslashes($e->getMessage());
+        
+        if (strpos($error_seguro, 'Duplicate entry') !== false) {
+            echo "<script>
+                    alert('Error: Ya existe una postulación con ese Código. Por favor, vuelve atrás e ingresa uno distinto.'); 
+                    window.history.back();
+                  </script>";
+        } else {
+            echo "<script>
+                    alert('Error en Base de Datos: " . $error_seguro . "'); 
+                    window.history.back();
+                  </script>";
+        }
     }
-} else{
-    echo "<h1>Error: No enviaste ningún formulario.</h1><a href='crear_postulacion.php'>Volver atrás</a>";
 }
 ?>

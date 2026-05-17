@@ -14,6 +14,22 @@ if(!isset($_GET['id']) || empty($_GET['id'])){
 require 'conexion.php';
 $id_postulacion = intval($_GET['id']);
 
+    if ($_SESSION['rol'] == 1) {
+        $sql_seguridad = "SELECT Correo_Responsable FROM Postulacion WHERE Numero_Postulacion = ?";
+        $stmt_seg = $conexion->prepare($sql_seguridad);
+        $stmt_seg->bind_param("i", $id_postulacion);
+        $stmt_seg->execute();
+        $resultado_seg = $stmt_seg->get_result()->fetch_assoc();
+
+        if (!$resultado_seg || $resultado_seg['Correo_Responsable'] != $_SESSION['usuario']) {
+            echo "<script>
+                    alert('Acceso denegado: No tienes permiso para eliminar esta postulación.'); 
+                    window.location.href='principal.php';
+                  </script>";
+            exit();
+        }
+    }
+
 //iniciamos transacción para borrar todo en orden seguro
 $conexion->begin_transaction();
 

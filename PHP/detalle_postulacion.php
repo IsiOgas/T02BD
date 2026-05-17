@@ -7,7 +7,6 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-//validamos que venga el ID de la postulación por la URL
 if(!isset($_GET['id']) || empty($_GET['id'])){
     echo "<script>alert('ID de postulación no válido.'); window.location.href='principal.php';</script>";
     exit();
@@ -16,7 +15,6 @@ if(!isset($_GET['id']) || empty($_GET['id'])){
 require 'conexion.php';
 $id_postulacion = intval($_GET['id']);
 
-//consulta principal: Postulación + Empresa + Iniciativa 
 $sql_principal = "SELECT p.*, e.Nombre_Empresa, e.Representante_Empresa, e.Mail_Representante, e.Convenio_USM, e.Telefono_Representante,
                          s.Nombre_Sede, r1.Nombre_Region AS Region_Ejecucion, r2.Nombre_Region AS Region_Impacto,
                          ti.Nombre_Tipo_Iniciativa, est.Nombre_Estado,
@@ -194,6 +192,10 @@ $total_semanas_bd = $resultado_func['Total'];
                     <h5 class="card-title text-secondary border-bottom pb-2">Resumen Técnico</h5>
                     <ul class="list-unstyled lh-lg mb-0">
                         <li><strong>Fecha:</strong> <?php echo date("d/m/Y", strtotime($postulacion['Fecha_Postulacion'])); ?></li>
+                        
+                        <li class="text-primary"><strong>Responsable 1:</strong> <?php echo htmlspecialchars($postulacion['Nombre_Responsable_1']); ?></li>
+                        <li class="text-primary"><strong>Responsable 2:</strong> <?php echo htmlspecialchars($postulacion['Nombre_Responsable_2']); ?></li>
+                        
                         <li><strong>Sede/Campus:</strong> <?php echo htmlspecialchars($postulacion['Nombre_Sede']); ?></li>
                         <li><strong>Región Ejecución:</strong> <?php echo htmlspecialchars($postulacion['Region_Ejecucion']); ?></li>
                         <li><strong>Región Impacto:</strong> <?php echo htmlspecialchars($postulacion['Region_Impacto']); ?></li>

@@ -1,11 +1,9 @@
 <?php
-//iniciamos sesion para poder recordar quien entro a la pagina 
+
 session_start();
 
-//traemos nuestra conexion a la base de datos
 require 'conexion.php';
 
-//verificamos que los datos vengan del formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correo = $_POST['usuario'];
     $pass = $_POST['contrasena'];

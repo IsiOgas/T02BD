@@ -74,7 +74,18 @@ $regiones_array = $regiones->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Presupuesto Solicitado ($)</label>
-                        <input type="number" class="form-control <?php echo $ya_enviado ? 'bg-light' : ''; ?>" name="presupuesto" value="<?php echo intval($postulacion['Presupuesto_Total']); ?>" <?php echo $ya_enviado ? 'readonly' : ''; ?> required>
+                        <input type="number" class="form-control" name="presupuesto" value="<?php echo intval($postulacion['Presupuesto_Total']); ?>" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre Responsable 1: Jefe(a) de Carreras</label>
+                        <input type="text" class="form-control" name="responsable1" value="<?php echo htmlspecialchars($postulacion['Nombre_Responsable_1']); ?>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre Responsable 2: Coordinador Proyecto</label>
+                        <input type="text" class="form-control" name="responsable2" value="<?php echo htmlspecialchars($postulacion['Nombre_Responsable_2']); ?>" required>
                     </div>
                 </div>
 

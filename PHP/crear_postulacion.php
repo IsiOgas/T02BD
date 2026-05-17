@@ -7,7 +7,6 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-//según el PDF, el rol 1 es quien crea las postulaciones
 if ($_SESSION['rol'] != 1) {
     echo "<script>alert('Solo los Responsables Académicos (Rol 1) pueden crear postulaciones.'); window.location.href='principal.php';</script>";
     exit();
@@ -15,7 +14,7 @@ if ($_SESSION['rol'] != 1) {
 
 require 'conexion.php';
 
-//traemos los catalogos de la base de datos para llenar los selectores
+//traemos los catalogos de la base de datos para llenar los select
 $empresas = $conexion->query("SELECT Rut_Empresa, Nombre_Empresa FROM Entidad_Empresa");
 $sedes = $conexion->query("SELECT ID_Sede, Nombre_Sede FROM Sede");
 $regiones = $conexion->query("SELECT ID_Region, Nombre_Region FROM Region");
@@ -99,6 +98,17 @@ $integrantes_db = $conexion->query("SELECT ID_integrante, Nombre_Integrante, RUT
                                 <option value="<?php echo $r['ID_Region']; ?>"><?php echo $r['Nombre_Region']; ?></option>
                             <?php } ?>
                         </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre Responsable 1: Jefe(a) de Carreras (*)</label>
+                        <input type="text" class="form-control" name="responsable1" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre Responsable 2: Coordinador Proyecto (*)</label>
+                        <input type="text" class="form-control" name="responsable2" placeholder="Ej: María González" required>
                     </div>
                 </div>
 

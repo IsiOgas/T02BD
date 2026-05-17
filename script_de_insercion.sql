@@ -74,20 +74,21 @@ VALUES
     ('76999888-1', 'Constructora Norte SpA', 'Roberto Soto', 'roberto.soto@cnorte.cl', '0', '912000111', '2'),
     ('77888999-5','BioInnovar SpA','Laura Méndez','laura.mendez@bioinnovar.cl','0','987654321','2');
 
-INSERT INTO Postulacion(Numero_Postulacion, Fecha_Postulacion, Codigo_Postulacion, Presupuesto_Total, Rut_Empresa, ID_Sede, ID_Region_Ejecucion, ID_Region_Impacto, ID_Tipo_Iniciativa, ID_Estado)
+INSERT INTO Postulacion(Numero_Postulacion, Fecha_Postulacion, Codigo_Postulacion, Presupuesto_Total, Nombre_Responsable_1, Nombre_Responsable_2, Rut_Empresa, ID_Sede, ID_Region_Ejecucion, ID_Region_Impacto, ID_Tipo_Iniciativa, ID_Estado)
 VALUES
-    ('1', '2026-04-18', 'A12','100000000','71202909-9','1','1','2','1','1'),
-    ('2', '2026-04-19', 'B12', '10000000', '79605789-4', '2','7','8','1', '1'),
-    ('3','2026-03-15','CT','18500000','76123456-7','2','13','6','2','3'),
-    ('4','2026-04-01','A04','22000000','76234567-8','1','5','13','1','1'),
-    ('5','2026-04-05','B05','15000000','76345678-9','3','8','9','2','1'),
-    ('6','2026-04-10','C06','19500000','76456789-0','4','2','3','1','1'),
-    ('7','2026-04-15','D07','17500000','76234567-8','1','13','5','1','1'),
-    ('8','2026-04-18','E08','21000000','76345678-9','3','9','8','2','1'),
-    ('9','2026-04-20','F09','16000000','76456789-0','4','6','13','1','1'),
-    ('10','2026-04-25','G10','25000000','76123456-7','2','13','6','2','1'),
-    ('11','2026-05-01','H11','18000000','76999888-1','2','13','5','1','1'),
-    ('12','2026-05-05','I12','14000000','76999888-1','2','13','5','1','1');
+    ('1', '2026-04-18', 'A12','100000000','sergio','francisco','71202909-9','1','1','2','1','1'),
+    ('2', '2026-04-19', 'B12', '10000000', 'juan', 'jorge', '79605789-4', ' 2','7','8','1', '1'),
+    ('3','2026-03-15','CT','18500000','Jose','María','76123456-7','2','13','6','2','3'),
+    ('4','2026-04-01','A04','22000000','Luis Herrera','Carolina Vega','76234567-8','1','5','13','1','1'),
+    ('5','2026-04-05','B05','15000000','Ricardo Núñez','Paula Torres','76345678-9','3','8','9','2','1'),
+    ('6','2026-04-10','C06','19500000','Claudia Pinto','Héctor Salinas','76456789-0','4','2','3','1','1'),
+    ('7','2026-04-15','D07','17500000','Luis Herrera','Carolina Vega','76234567-8','1','13','5','1','1'),
+    ('8','2026-04-18','E08','21000000','Ricardo Núñez','Paula Torres','76345678-9','3','9','8','2','1'),
+    ('9','2026-04-20','F09','16000000','Claudia Pinto','Héctor Salinas','76456789-0','4','6','13','1','1'),
+    ('10','2026-04-25','G10','25000000','Juan Pérez','María González','76123456-7','2','13','6','2','1'),
+    ('11','2026-05-01','H11','18000000','Diego Fernández','Camila Bravo','76999888-1','2','13','5','1','1'),
+    ('12','2026-05-05','I12','14000000','Gabriel Soto','Daniela Pérez','76999888-1','2','13','5','1','1');
+
 
 INSERT INTO Iniciativa(Documentos, Nombre_Iniciativa, Objetivo_Iniciativa, Descripcion_Soluciones, Resultados_Esperados, ID_Postulacion)
 VALUES
@@ -175,6 +176,6 @@ VALUES
 INSERT INTO Usuarios (Correo, Contrasena, Rol) VALUES
 ('postulante@usm.cl', '1234', 1),
 ('evaluador@usm.cl', '1234', 2),
-('admin@usm.cl', '1234', 3)
+('admin@usm.cl', '1234', 3),
 ('postulante2@usm.cl', '1234', 1),
 ('evaluador2@usm.cl', '1234', 2);

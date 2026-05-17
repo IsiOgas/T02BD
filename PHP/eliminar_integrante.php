@@ -25,7 +25,6 @@ try{
               </script>";
     }
 } catch (mysqli_sql_exception $e){
-    //si arroja error por integridad referencial fk
     echo "<script>
             alert('No se puede eliminar al integrante porque actualmente participa en un proyecto activo. Primero debes removerlo del equipo del proyecto.');
             window.location.href='gestionar_equipo.php';

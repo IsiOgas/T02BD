@@ -77,6 +77,14 @@ INSERT INTO Estado_Postulacion(ID_Estado, Nombre_Estado) VALUES
 (2, 'Aprobada'), 
 (3, 'Rechazada'), 
 (4, 'Cerrada');
+INSERT INTO Estado_Postulacion (ID_Estado, Nombre_Estado) VALUES (5, 'Borrador');
+
+CREATE TABLE Usuarios (
+    ID_Usuario INT PRIMARY KEY AUTO_INCREMENT,
+    Correo VARCHAR(100) NOT NULL UNIQUE,
+    Contrasena VARCHAR(255) NOT NULL,
+    Rol INT NOT NULL
+) ENGINE=InnoDB;
 
 -- CREACIÓN DE TABLAS PRINCIPALES (CORREGIDAS A 3FN)
 CREATE TABLE Entidad_Empresa(
@@ -95,6 +103,8 @@ CREATE TABLE Postulacion(
     Fecha_Postulacion DATE NOT NULL,
     Codigo_Postulacion VARCHAR(100) NOT NULL UNIQUE,
     Presupuesto_Total DECIMAL(15,2) NOT NULL,
+    Nombre_Responsable_1 VARCHAR(100) NOT NULL, 
+    Nombre_Responsable_2 VARCHAR(100) NOT NULL,
     Rut_Empresa VARCHAR(10) NOT NULL,
     ID_Sede INT NOT NULL,
     ID_Region_Ejecucion INT NOT NULL,
@@ -108,6 +118,10 @@ CREATE TABLE Postulacion(
     FOREIGN KEY (ID_Tipo_Iniciativa) REFERENCES Tipo_Iniciativa(ID_Tipo_Iniciativa),
     FOREIGN KEY (ID_Estado) REFERENCES Estado_Postulacion(ID_Estado)
 ) ENGINE=InnoDB;
+
+ALTER TABLE Postulacion ADD Correo_Responsable VARCHAR(100) DEFAULT 'postulante@usm.cl';
+ALTER TABLE Postulacion ADD ID_Evaluador INT NULL;
+ALTER TABLE Postulacion ADD FOREIGN KEY (ID_Evaluador) REFERENCES Usuarios(ID_Usuario);
 
 CREATE TABLE Iniciativa(
     ID_Iniciativa INT PRIMARY KEY AUTO_INCREMENT,
@@ -152,19 +166,12 @@ CREATE TABLE Etapa_Cronograma(
     FOREIGN KEY (ID_Postulacion) REFERENCES Postulacion(Numero_Postulacion)
 ) ENGINE=InnoDB;
 
-
-#creo los usuarios
-CREATE TABLE Usuarios (
-    ID_Usuario INT PRIMARY KEY AUTO_INCREMENT,
-    Correo VARCHAR(100) NOT NULL UNIQUE,
-    Contrasena VARCHAR(255) NOT NULL,
-    Rol INT NOT NULL
-) ENGINE=InnoDB;
-
 CREATE OR REPLACE VIEW Vista_Postulaciones_Principal AS
 SELECT 
     p.Numero_Postulacion, 
     p.Codigo_Postulacion, 
+    p.Nombre_Responsable_1,
+    p.Nombre_Responsable_2,
     i.Nombre_Iniciativa, 
     e.Nombre_Empresa, 
     s.Nombre_Sede, 
@@ -214,9 +221,3 @@ BEGIN
     WHERE Numero_Postulacion = p_numero;
 END //
 DELIMITER ;
-
-
-ALTER TABLE Postulacion ADD Correo_Responsable VARCHAR(100) DEFAULT 'postulante@usm.cl';
-ALTER TABLE Postulacion ADD ID_Evaluador INT NULL;
-ALTER TABLE Postulacion ADD FOREIGN KEY (ID_Evaluador) REFERENCES Usuarios(ID_Usuario);
-INSERT INTO Estado_Postulacion (ID_Estado, Nombre_Estado) VALUES (5, 'Borrador');

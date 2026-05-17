@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Validamos que sea el Postulante (Rol 1)
 if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 1) {
     header("Location: index.php");
     exit();
@@ -16,7 +15,6 @@ require 'conexion.php';
 $id_postulacion = intval($_GET['id']);
 $correo_usuario = $_SESSION['usuario'];
 
-// Cambiamos el estado al ID 1 (En Revisión) 
 $sql = "UPDATE Postulacion SET ID_Estado = 1 WHERE Numero_Postulacion = ? AND Correo_Responsable = ?";
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("is", $id_postulacion, $correo_usuario);

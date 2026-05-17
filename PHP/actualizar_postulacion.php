@@ -12,6 +12,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $id = intval($_POST['id']);
     $codigo = $_POST['codigo'];
     $presupuesto = $_POST['presupuesto'];
+    $resp1 = $_POST['responsable1'];
+    $resp2 = $_POST['responsable2'];
     $sede = $_POST['sede'];
     $region_ejecucion = $_POST['region_ejecucion'];
     $region_impacto = $_POST['region_impacto'];
@@ -25,9 +27,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     try{
         //actualizar tabla Postulacion
-        $sql_post = "UPDATE Postulacion SET Codigo_Postulacion = ?, Presupuesto_Total = ?, ID_Sede = ?, ID_Region_Ejecucion = ?, ID_Region_Impacto = ? WHERE Numero_Postulacion = ?";
+        $sql_post = "UPDATE Postulacion SET Codigo_Postulacion = ?, Presupuesto_Total = ?, Nombre_Responsable_1 = ?, Nombre_Responsable_2 = ?, ID_Sede = ?, ID_Region_Ejecucion = ?, ID_Region_Impacto = ? WHERE Numero_Postulacion = ?";
         $stmt_post = $conexion->prepare($sql_post);
-        $stmt_post->bind_param("sdsiii", $codigo, $presupuesto, $sede, $region_ejecucion, $region_impacto, $id);
+        $stmt_post->bind_param("sdssiiii", $codigo, $presupuesto, $resp1, $resp2, $sede, $region_ejecucion, $region_impacto, $id);
         $stmt_post->execute();
 
         //actualizar tabla Iniciativa
